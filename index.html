@@ -3,37 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Lesson Download</title>
-<script>
-let allData = [];
-
-function renderCards(data){
-    const container = document.getElementById("cardContainer");
-    container.innerHTML = "";
-
-    data.forEach(item=>{
-        container.innerHTML += `
-            <div class="card">
-                <h3>${item.title}</h3>
-                <p>${item.subject}</p>
-                <p>${item.category}</p>
-                <p>${item.grade}</p>
-                <a href="${item.file}" target="_blank">Download</a>
-            </div>
-        `;
-    });
-}
-
-fetch("data.json")
-.then(res=>res.json())
-.then(data=>{
-    console.log("โหลดได้:", data);
-    allData = data;
-    renderCards(data);
-})
-.catch(err=>{
-    console.error("โหลดไม่ได้:", err);
-});
-</script>
 
 <style>
 body { margin:0; font-family: Arial, sans-serif; }
@@ -176,24 +145,6 @@ const text=card.dataset.search.toLowerCase();
 card.style.display = text.includes(keyword) ? "block":"none";
 });
 });
-
-	function toggle(id){
-    const el = document.getElementById(id);
-    if(el.style.display === "block"){
-        el.style.display = "none";
-    } else {
-        el.style.display = "block";
-    }
-}
-
-function selectGrade(el, subject, category, grade){
-    const filtered = allData.filter(item =>
-        item.subject === subject &&
-        item.category === category &&
-        item.grade === grade
-    );
-    renderCards(filtered);
-}
 
 </script>
 

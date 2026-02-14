@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<script>
+fetch("https://script.google.com/a/macros/wattano.ac.th/s/AKfycbzMd_k9gZHw580GP0WfUUF2hZncQovMtH2nqXx3zh531MjRAIsjdyYRQuPvSRlU_TaGgg/exec", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    username,
+    password
+  })
+})
+
+</script>
+
+
+<head>
+<meta charset="UTF-8">
+<title>Register</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.box {
+    background: white;
+    padding: 30px;
+    width: 320px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+h2 {
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.msg {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>Register</h2>
+
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="register()">Register</button>
+
+    <p class="msg" id="msg"></p>
+
+    <a href="login.html">Already have an account?</a>
+</div>
+
+<script>
+function register() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const msg = document.getElementById("msg");
+
+    if (!username || !password) {
+        msg.style.color = "red";
+        msg.innerText = "Please fill all fields";
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+
+    const exists = users.find(u => u.username === username);
+    if (exists) {
+        msg.style.color = "red";
+        msg.innerText = "Username already exists";
+        return;
+    }
+
+    users.push({ username, password });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    msg.style.color = "green";
+    msg.innerText = "Register success! Redirecting...";
+
+    setTimeout(() => {
+        window.location.href = "login.html";
+    }, 1500);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Lesson Download</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background: #f3f3f3;
+    padding: 15px;
+    overflow-y: auto;      /* ✅ allow vertical scroll */
+}
+
+
+.menu-item {
+    padding: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.menu-item:hover {
+    background: #ddd;
+}
+
+.dropdown {
+    display: none;
+    margin-left: 15px;
+    font-size: 14px;
+}
+
+.dropdown a {
+    display: block;
+    padding: 5px;
+    text-decoration: none;
+    color: black;
+}
+
+.dropdown a:hover {
+    background: #ddd;
+}
+
+/* Main */
+.main {
+    flex: 1;
+    padding: 20px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.search {
+    width: 300px;
+    padding: 8px;
+}
+
+/* User box */
+.user-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    background: #333;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.logout {
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+/* Cards */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.card-link {
+    text-decoration: none;
+    color: black;
+}
+
+.card {
+    border: 2px solid #000;
+    padding: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.card:hover {
+    background: #f5f5f5;
+    transform: translateY(-2px);
+}
+
+.pdf {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="index.html" style="text-decoration:none; color:black;">
+    	<div class="menu-item">Home</div>
+		</a>
+
+        <div class="menu-item" onclick="toggleDropdown('math')">
+            คณิตศาสตร์ ▾
+        </div>
+        <div class="dropdown" id="math">
+            <a href="#">ม.1</a>
+            <a href="#">ม.2</a>
+            <a href="#">ม.3</a>
+            <a href="#">ม.4</a>
+			<a href="#">ม.5</a>
+            <a href="#">ม.6</a>
+        </div>
+
+        <div class="menu-item" onclick="toggleDropdown('science')">
+            วิทยาศาสตร์ ▾
+        </div>
+        <div class="dropdown" id="science">
+            <div class="menu-item" onclick="toggleDropdown('physic')">
+            ฟิสิกส์ ▾
+        	</div>
+			<div class="dropdown" id="physic">
+            <a href="#">ม.1</a>
+            <a href="#">ม.2</a>
+            <a href="#">ม.3</a>
+            <a href="#">ม.4</a>
+			<a href="#">ม.5</a>
+            <a href="#">ม.6</a>
+        	</div>
+			<div class="menu-item" onclick="toggleDropdown('bio')">
+            ชีวะ ▾
+        	</div>
+			<div class="dropdown" id="bio">
+            <a href="#">ม.1</a>
+            <a href="#">ม.2</a>
+            <a href="#">ม.3</a>
+            <a href="#">ม.4</a>
+			<a href="#">ม.5</a>
+            <a href="#">ม.6</a>
+        	</div>
+			<div class="menu-item" onclick="toggleDropdown('chem')">
+            เคมี ▾
+        	</div>
+			<div class="dropdown" id="chem">
+            <a href="#">ม.1</a>
+            <a href="#">ม.2</a>
+            <a href="#">ม.3</a>
+            <a href="#">ม.4</a>
+			<a href="#">ม.5</a>
+            <a href="#">ม.6</a>
+        	</div>
+
+        </div>
+		<div class="menu-item" onclick="toggleDropdown('thai')">
+            ภาษาไทย ▾
+        </div>
+        <div class="dropdown" id="thai">
+            <a href="#">ม.1</a>
+            <a href="#">ม.2</a>
+            <a href="#">ม.3</a>
+            <a href="#">ม.4</a>
+			<a href="#">ม.5</a>
+            <a href="#">ม.6</a>
+        </div>
+		<div class="menu-item" onclick="toggleDropdown('social')">
+            สังคมศึกษา ▾
+        </div>
+        <div class="dropdown" id="social">
+            <a href="#">ม.1</a>
+            <a href="#">ม.2</a>
+            <a href="#">ม.3</a>
+            <a href="#">ม.4</a>
+			<a href="#">ม.5</a>
+            <a href="#">ม.6</a>
+        </div>
+		<div class="menu-item" onclick="toggleDropdown('english')">
+            ภาษาอังกฤษ ▾
+        </div>
+        <div class="dropdown" id="english">
+            <a href="#">ม.1</a>
+            <a href="#">ม.2</a>
+            <a href="#">ม.3</a>
+            <a href="#">ม.4</a>
+			<a href="#">ม.5</a>
+            <a href="#">ม.6</a>
+        </div>
+		<div class="menu-item" onclick="toggleDropdown('other')">
+            อื่น ๆ ▾
+        </div>
+        <div class="dropdown" id="other">
+            <a href="#">-</a>
+            <a href="#">-</a>
+            <a href="#">-</a>
+            <a href="#">-</a>
+			<a href="#">-</a>
+            <a href="#">-</a>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <div class="topbar">
+            <input class="search" id="search" type="text" placeholder="ค้นหาบทเรียน">
+
+            <div class="user-box">
+                <div class="avatar" id="avatar"></div>
+                <span id="usernameDisplay"></span>
+                <button class="logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="cards">
+
+            <a class="card-link" data-search="จำนวนเต็ม คณิตศาสตร์ ม.1" href="pdf/math_m1.pdf" download>
+            <div class="card">
+                    <b>สรุป คณิตศาสตร์</b><br>
+                    เรื่อง จำนวนเต็ม
+                    <div class="pdf">จำนวนเต็ม ม.1.pdf</div>
+                </div>
+            </a>
+
+            <a class="card-link" data-search="ฟังก์ชัน คณิตศาสตร์ ม.2" href="FilesFolder/TEST.txt" download>
+                <div class="card">
+                    <b>สรุป คณิตศาสตร์</b><br>
+                    เรื่อง ฟังก์ชัน
+                    <div class="pdf">ฟังก์ชัน ม.2.pdf</div>
+                </div>
+            </a>
+
+            <a class="card-link" data-search="สมการ คณิตศาสตร์ ม.3" href="pdf/math_m3.pdf" download>
+                <div class="card">
+                    <b>สรุป คณิตศาสตร์</b><br>
+                    เรื่อง สมการ
+                    <div class="pdf">สมการ ม.3.pdf</div>
+                </div>
+            </a>
+
+            <a class="card-link" data-search="ความน่าจะเป็น คณิตศาสตร์ ม.4" href="pdf/math_m4.pdf" download>
+                <div class="card">
+                    <b>สรุป คณิตศาสตร์</b><br>
+                    เรื่อง ความน่าจะเป็น
+                    <div class="pdf">ความน่าจะเป็น ม.4.pdf</div>
+                </div>
+            </a>
+			
+		
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+// 🔒 protect page
+if (localStorage.getItem("loggedIn") !== "true") {
+   window.location.href = "login.html";
+}
+
+// 👤 show username + avatar
+const username = localStorage.getItem("currentUser");
+document.getElementById("usernameDisplay").innerText = username;
+document.getElementById("avatar").innerText = username.charAt(0).toUpperCase();
+
+// 🚪 logout
+function logout() {
+    localStorage.removeItem("loggedIn");
+    localStorage.removeItem("currentUser");
+    window.location.href = "login.html";
+}
+
+// dropdown
+function toggleDropdown(id) {
+    const d = document.getElementById(id);
+    d.style.display = d.style.display === "block" ? "none" : "block";
+}
+
+// 🔍 search (cards only)
+document.getElementById("search").addEventListener("keyup", function () {
+    const keyword = this.value.toLowerCase();
+    document.querySelectorAll(".card-link").forEach(card => {
+        const text = card.dataset.search.toLowerCase();
+        card.style.display = text.includes(keyword) ? "block" : "none";
+    });
+});
+</script>
+
+</body>
+</html>

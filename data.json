@@ -4,21 +4,14 @@
     "subject": "วิทยาศาสตร์",
     "category": "ฟิสิกส์",
     "grade": "ม.4",
-    "tags": ["แรง", "กฎนิวตัน", "การเคลื่อนที่"],
+    "tags": ["แรง","กฎนิวตัน"],
     "file": "FilesFolder/force.pdf"
   },
   {
     "title": "Passive Voice",
     "subject": "ภาษาอังกฤษ",
     "grade": "ม.5",
-    "tags": ["Grammar", "Passive Voice", "Tense"],
-    "file": "FilesFolder/english.pdf"
-  },
-  {
-    "title": "รัฐธรรมนูญ 2560",
-    "subject": "สังคม",
-    "grade": "ม.6",
-    "tags": ["รัฐธรรมนูญ", "หน้าที่พลเมือง", "กฎหมาย"],
-    "file": "FilesFolder/social.pdf"
+    "tags": ["Grammar"],
+    "file": "FilesFolder/eng.pdf"
   }
 ]

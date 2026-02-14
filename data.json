@@ -4,14 +4,11 @@
     "subject": "วิทยาศาสตร์",
     "category": "ฟิสิกส์",
     "grade": "ม.4",
-    "tags": ["แรง","กฎนิวตัน"],
-    "file": "FilesFolder/force.pdf"
+    "file": "FilesFolder/TEST.txt"
   },
-  {
-    "title": "Passive Voice",
-    "subject": "ภาษาอังกฤษ",
-    "grade": "ม.5",
-    "tags": ["Grammar"],
-    "file": "FilesFolder/eng.pdf"
-  }
+  {"title": "ภาษา",
+    "subject": "ภาษาไทย",
+    "category": "-",
+    "grade": "ม.4",
+    "file": "FilesFolder/TEST.txt"}
 ]

@@ -59,7 +59,7 @@ button{
 <div class="box">
     <h3>เพิ่ม / แก้ไข Card</h3>
 
-    <input id="title" placeholder="หัวข้อ">
+    <input id="title" placeholder="หัว��้อ">
     <input id="description" placeholder="รายละเอียด">
     <input id="file" placeholder="ไฟล์ เช่น FilesFolder/test.pdf">
 
@@ -116,13 +116,22 @@ function clearToken(){
 }
 
 async function loadData(){
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`)
-    const data = await res.json()
+    try {
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`)
+        
+        if (!res.ok) {
+            console.error("Failed to load data:", res.status, res.statusText)
+            return
+        }
 
-    sha = data.sha
-    const content = atob(data.content)
-    cards = JSON.parse(content)
-    render()
+        const data = await res.json()
+        sha = data.sha
+        const content = atob(data.content)
+        cards = JSON.parse(content)
+        render()
+    } catch (error) {
+        console.error("Error loading data:", error)
+    }
 }
 
 function render(){
@@ -133,8 +142,8 @@ function render(){
         list.innerHTML+=`
         <div class="card">
             <b>${c.title}</b><br>
-            ${c.description}<br>
-            ${c.subject} - ${c.grade}<br>
+            ${c.description || ''}<br>
+            ${c.subject} - ${c.category || c.subsubject || ''} - ${c.grade}<br>
             <button onclick="deleteCard(${i})">Delete</button>
         </div>
         `
@@ -147,7 +156,7 @@ function addCard(){
         description:document.getElementById("description").value,
         file:document.getElementById("file").value,
         subject:document.getElementById("subject").value,
-        subsubject:document.getElementById("subsubject").value,
+        category:document.getElementById("subsubject").value,
         grade:document.getElementById("grade").value
     }
 
@@ -167,23 +176,47 @@ async function uploadData(){
         return
     }
 
-    const content = btoa(JSON.stringify(cards,null,2))
+    // ✅ IMPORTANT: Refresh SHA before uploading
+    try {
+        const refreshRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`)
+        const refreshData = await refreshRes.json()
+        sha = refreshData.sha
+        console.log("Updated SHA:", sha)
+    } catch (error) {
+        console.error("Failed to refresh SHA:", error)
+        alert("ไม่สามารถอัปเดต SHA ได้")
+        return
+    }
 
-    await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
-        method:"PUT",
-        headers:{
-            Authorization:"token "+token,
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            message:"update data.json",
-            content:content,
-            sha:sha
+    const content = btoa(JSON.stringify(cards, null, 2))
+
+    try {
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `token ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: "update data.json",
+                content: content,
+                sha: sha
+            })
         })
-    })
 
-    alert("อัปเดตสำเร็จ")
-    loadData()
+        if (!res.ok) {
+            const errorData = await res.json()
+            console.error("API Error:", errorData)
+            alert("ข้อผิดพลาด: " + (errorData.message || "ไม่สามารถอัปเดตได้"))
+            return
+        }
+
+        alert("อัปเดตสำเร็จ")
+        await loadData()
+    } catch (error) {
+        console.error("Upload error:", error)
+        alert("ข้อผิดพลาด: " + error.message)
+    }
 }
 
 loadData()

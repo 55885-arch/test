@@ -4,36 +4,30 @@
 <meta charset="UTF-8">
 <title>Admin Panel</title>
 <style>
-body{font-family:Arial;padding:20px}
-input,select{padding:6px;margin:5px}
-button{padding:6px 10px;margin:5px}
-.card{border:1px solid #ccc;padding:10px;margin:10px 0}
+body{font-family:Arial;background:#f4f4f4;padding:20px}
+input,select,button{padding:6px;margin:4px}
+.card{background:#fff;padding:10px;margin:8px 0;border-radius:8px}
 </style>
 </head>
 <body>
 
-<h2>🔐 Admin Panel</h2>
+<h2>Admin Panel</h2>
 
-<div id="loginBox">
-    <input id="user" placeholder="Username">
-    <input id="pass" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-</div>
-
-<div id="adminBox" style="display:none">
+<input type="password" id="token" placeholder="GitHub Token">
 
 <h3>เพิ่ม / แก้ไข Card</h3>
 
-<input id="title" placeholder="ชื่อบทเรียน">
+<input type="hidden" id="cardId">
+
+<input id="title" placeholder="ชื่อเรื่อง">
 
 <select id="subject">
-<option>คณิตศาสตร์</option>
 <option>วิทยาศาสตร์</option>
+<option>คณิตศาสตร์</option>
 <option>ภาษาไทย</option>
 </select>
 
-<select id="sub">
-<option value="">ไม่มีหมวดย่อย</option>
+<select id="category">
 <option>วิทยาศาสตร์พื้นฐาน</option>
 <option>ฟิสิกส์</option>
 <option>เคมี</option>
@@ -49,172 +43,110 @@ button{padding:6px 10px;margin:5px}
 <option>ม.6</option>
 </select>
 
-<br>
-
-<input type="file" id="fileInput">
-<button onclick="uploadFile()">Upload ไป GitHub</button>
+<input id="file" placeholder="FilesFolder/xxx.pdf">
 
 <br>
-
-<select id="fileSelect"></select>
-<button onclick="loadFiles()">โหลดไฟล์จาก GitHub</button>
-
-<br><br>
-
-<button onclick="saveCard()">บันทึก Card</button>
+<button onclick="saveCard()">บันทึก</button>
 
 <hr>
 
 <h3>รายการ Card</h3>
-<div id="cardList"></div>
-
-</div>
+<div id="list"></div>
 
 <script>
 
-// 🔴 ใส่ข้อมูล repo คุณตรงนี้
-const owner = "55885-arch";
-const repo = "test";
-const folder = "FilesFolder";
-const token = "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";
+const repo = "55885-arch/test";
+const dataPath = "data.json";
 
-let editIndex = null;
+let allData = [];
+let sha = "";
 
-function login(){
-    if(user.value==="ADMIN" && pass.value==="1234"){
-        loginBox.style.display="none";
-        adminBox.style.display="block";
-        renderCards();
-    }else{
-        alert("ผิด");
-    }
+async function loadData(){
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${dataPath}`);
+    const data = await res.json();
+    sha = data.sha;
+    const decoded = atob(data.content);
+    allData = JSON.parse(decoded);
+    renderList();
+}
+
+function renderList(){
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+    allData.forEach(item=>{
+        list.innerHTML += `
+        <div class="card">
+            <b>${item.title}</b>
+            <br>${item.subject} / ${item.category} / ${item.grade}
+            <br>
+            <button onclick="editCard(${item.id})">แก้ไข</button>
+            <button onclick="deleteCard(${item.id})">ลบ</button>
+        </div>
+        `;
+    });
+}
+
+function editCard(id){
+    const item = allData.find(i=>i.id===id);
+    document.getElementById("cardId").value = item.id;
+    document.getElementById("title").value = item.title;
+    document.getElementById("subject").value = item.subject;
+    document.getElementById("category").value = item.category;
+    document.getElementById("grade").value = item.grade;
+    document.getElementById("file").value = item.file;
+}
+
+function deleteCard(id){
+    allData = allData.filter(i=>i.id!==id);
+    updateGitHub();
 }
 
 function saveCard(){
+    const id = document.getElementById("cardId").value;
+    const title = document.getElementById("title").value;
+    const subject = document.getElementById("subject").value;
+    const category = document.getElementById("category").value;
+    const grade = document.getElementById("grade").value;
+    const file = document.getElementById("file").value;
 
-    let data = JSON.parse(localStorage.getItem("schoolData")) || [];
-
-    let obj = {
-        title:title.value,
-        subject:subject.value,
-        sub:sub.value,
-        grade:grade.value,
-        file:fileSelect.value
-    };
-
-    if(editIndex!==null){
-        data[editIndex]=obj;
-        editIndex=null;
+    if(id){
+        const item = allData.find(i=>i.id==id);
+        item.title = title;
+        item.subject = subject;
+        item.category = category;
+        item.grade = grade;
+        item.file = file;
     }else{
-        data.push(obj);
+        const newId = Date.now();
+        allData.push({id:newId,title,subject,category,grade,file});
     }
 
-    localStorage.setItem("schoolData",JSON.stringify(data));
-    renderCards();
+    updateGitHub();
 }
 
-function renderCards(){
-    let data = JSON.parse(localStorage.getItem("schoolData")) || [];
-    cardList.innerHTML="";
-    data.forEach((d,i)=>{
-        cardList.innerHTML+=`
-        <div class="card">
-        ${d.title} (${d.grade})
-        <br>
-        <button onclick="editCard(${i})">แก้ไข</button>
-        <button onclick="deleteCard(${i})">ลบ</button>
-        </div>`;
-    });
-}
+async function updateGitHub(){
+    const token = document.getElementById("token").value;
 
-function editCard(i){
-    let data = JSON.parse(localStorage.getItem("schoolData"));
-    let d = data[i];
-    title.value=d.title;
-    subject.value=d.subject;
-    sub.value=d.sub;
-    grade.value=d.grade;
-    fileSelect.value=d.file;
-    editIndex=i;
-}
+    const content = btoa(JSON.stringify(allData,null,2));
 
-function deleteCard(i){
-    let data = JSON.parse(localStorage.getItem("schoolData"));
-    data.splice(i,1);
-    localStorage.setItem("schoolData",JSON.stringify(data));
-    renderCards();
-}
-
-/* ================= GITHUB API ================= */
-
-async function uploadFile(){
-
-    let file = fileInput.files[0];
-    if(!file) return alert("เลือกไฟล์ก่อน");
-
-    let reader = new FileReader();
-    reader.onload = async function(){
-
-        let base64 = reader.result.split(',')[1];
-
-        let res = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/${folder}/${file.name}`,{
-            method:"PUT",
-            headers:{
-                "Authorization":"token "+token,
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                message:"upload file",
-                content:base64
-            })
-        });
-
-        let result = await res.json();
-        alert("Upload สำเร็จ");
-        loadFiles();
-    };
-
-    reader.readAsDataURL(file);
-}
-
-async function loadFiles(){
-
-    let res = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`,{
-        headers:{
-            "Authorization":"token "+token
-        }
-    });
-
-    let files = await res.json();
-    fileSelect.innerHTML="";
-
-    files.forEach(f=>{
-        fileSelect.innerHTML+=
-        `<option value="${f.download_url}">
-        ${f.name}
-        </option>`;
-    });
-}
-
-async function deleteGitHubFile(filename,sha){
-
-    await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/contents/${folder}/${filename}`,{
-        method:"DELETE",
+    await fetch(`https://api.github.com/repos/${repo}/contents/${dataPath}`,{
+        method:"PUT",
         headers:{
             "Authorization":"token "+token,
             "Content-Type":"application/json"
         },
         body:JSON.stringify({
-            message:"delete file",
+            message:"update data.json",
+            content:content,
             sha:sha
         })
     });
 
-    alert("ลบไฟล์สำเร็จ");
+    alert("บันทึกสำเร็จ");
+    loadData();
 }
+
+loadData();
 
 </script>
 

@@ -3,136 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <title>Admin Panel</title>
+
 <style>
-body{font-family:Arial;background:#f4f4f4;padding:20px}
-input,select,button{padding:6px;margin:4px}
-.card{background:#fff;padding:10px;margin:8px 0;border-radius:8px}
+body{
+    font-family:Arial;
+    background:#f4f4f4;
+    margin:0;
+    padding:20px;
+}
+
+h2{
+    margin-top:0;
+}
+
+.box{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+input,select{
+    padding:8px;
+    margin:5px 0;
+    width:100%;
+}
+
+button{
+    padding:8px 15px;
+    margin-top:10px;
+    cursor:pointer;
+}
+
+.card{
+    border:1px solid #ccc;
+    padding:10px;
+    margin:10px 0;
+}
 </style>
 </head>
+
 <body>
 
-<h2>Admin Panel</h2>
+<h2>🔒 Admin Panel</h2>
 
-<input type="password" id="token" placeholder="GitHub Token">
+<div class="box">
+    <h3>GitHub Token</h3>
+    <input type="password" id="tokenInput" placeholder="ใส่ GitHub Token">
+    <button onclick="saveToken()">Save Token</button>
+    <button onclick="clearToken()">Clear Token</button>
+    <p id="tokenStatus"></p>
+</div>
 
-<h3>เพิ่ม / แก้ไข Card</h3>
+<div class="box">
+    <h3>เพิ่ม / แก้ไข Card</h3>
 
-<input type="hidden" id="cardId">
+    <input id="title" placeholder="หัวข้อ">
+    <input id="description" placeholder="รายละเอียด">
+    <input id="file" placeholder="ไฟล์ เช่น FilesFolder/test.pdf">
 
-<input id="title" placeholder="ชื่อเรื่อง">
+    <select id="subject">
+        <option>คณิตศาสตร์</option>
+        <option>วิทยาศาสตร์</option>
+        <option>ภาษาไทย</option>
+        <option>ภาษาอังกฤษ</option>
+    </select>
 
-<select id="subject">
-<option>วิทยาศาสตร์</option>
-<option>คณิตศาสตร์</option>
-<option>ภาษาไทย</option>
-</select>
+    <select id="subsubject">
+        <option>-</option>
+        <option>วิทยาศาสตร์พื้นฐาน</option>
+        <option>ฟิสิกส์</option>
+        <option>เคมี</option>
+        <option>ชีวะ</option>
+    </select>
 
-<select id="category">
-<option>วิทยาศาสตร์พื้นฐาน</option>
-<option>ฟิสิกส์</option>
-<option>เคมี</option>
-<option>ชีวะ</option>
-</select>
+    <select id="grade">
+        <option>ม.1</option>
+        <option>ม.2</option>
+        <option>ม.3</option>
+        <option>ม.4</option>
+        <option>ม.5</option>
+        <option>ม.6</option>
+    </select>
 
-<select id="grade">
-<option>ม.1</option>
-<option>ม.2</option>
-<option>ม.3</option>
-<option>ม.4</option>
-<option>ม.5</option>
-<option>ม.6</option>
-</select>
+    <button onclick="addCard()">Add Card</button>
+    <button onclick="uploadData()">Save to GitHub</button>
+</div>
 
-<input id="file" placeholder="FilesFolder/xxx.pdf">
-
-<br>
-<button onclick="saveCard()">บันทึก</button>
-
-<hr>
-
-<h3>รายการ Card</h3>
-<div id="list"></div>
+<div class="box">
+    <h3>รายการ Card</h3>
+    <div id="cardList"></div>
+</div>
 
 <script>
+const owner = "55885-arch"
+const repo = "test"
+const path = "data.json"
 
-const repo = "55885-arch/test";
-const dataPath = "data.json";
+let cards = []
+let sha = ""
 
-let allData = [];
-let sha = "";
+function saveToken(){
+    const token = document.getElementById("tokenInput").value
+    localStorage.setItem("githubToken", token)
+    document.getElementById("tokenStatus").innerText="Token saved"
+}
+
+function clearToken(){
+    localStorage.removeItem("githubToken")
+    document.getElementById("tokenStatus").innerText="Token cleared"
+}
 
 async function loadData(){
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${dataPath}`);
-    const data = await res.json();
-    sha = data.sha;
-    const decoded = atob(data.content);
-    allData = JSON.parse(decoded);
-    renderList();
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`)
+    const data = await res.json()
+
+    sha = data.sha
+    const content = atob(data.content)
+    cards = JSON.parse(content)
+    render()
 }
 
-function renderList(){
-    const list = document.getElementById("list");
-    list.innerHTML = "";
-    allData.forEach(item=>{
-        list.innerHTML += `
+function render(){
+    const list = document.getElementById("cardList")
+    list.innerHTML=""
+
+    cards.forEach((c,i)=>{
+        list.innerHTML+=`
         <div class="card">
-            <b>${item.title}</b>
-            <br>${item.subject} / ${item.category} / ${item.grade}
-            <br>
-            <button onclick="editCard(${item.id})">แก้ไข</button>
-            <button onclick="deleteCard(${item.id})">ลบ</button>
+            <b>${c.title}</b><br>
+            ${c.description}<br>
+            ${c.subject} - ${c.grade}<br>
+            <button onclick="deleteCard(${i})">Delete</button>
         </div>
-        `;
-    });
+        `
+    })
 }
 
-function editCard(id){
-    const item = allData.find(i=>i.id===id);
-    document.getElementById("cardId").value = item.id;
-    document.getElementById("title").value = item.title;
-    document.getElementById("subject").value = item.subject;
-    document.getElementById("category").value = item.category;
-    document.getElementById("grade").value = item.grade;
-    document.getElementById("file").value = item.file;
-}
-
-function deleteCard(id){
-    allData = allData.filter(i=>i.id!==id);
-    updateGitHub();
-}
-
-function saveCard(){
-    const id = document.getElementById("cardId").value;
-    const title = document.getElementById("title").value;
-    const subject = document.getElementById("subject").value;
-    const category = document.getElementById("category").value;
-    const grade = document.getElementById("grade").value;
-    const file = document.getElementById("file").value;
-
-    if(id){
-        const item = allData.find(i=>i.id==id);
-        item.title = title;
-        item.subject = subject;
-        item.category = category;
-        item.grade = grade;
-        item.file = file;
-    }else{
-        const newId = Date.now();
-        allData.push({id:newId,title,subject,category,grade,file});
+function addCard(){
+    const newCard={
+        title:document.getElementById("title").value,
+        description:document.getElementById("description").value,
+        file:document.getElementById("file").value,
+        subject:document.getElementById("subject").value,
+        subsubject:document.getElementById("subsubject").value,
+        grade:document.getElementById("grade").value
     }
 
-    updateGitHub();
+    cards.push(newCard)
+    render()
 }
 
-async function updateGitHub(){
-    const token = document.getElementById("token").value;
+function deleteCard(i){
+    cards.splice(i,1)
+    render()
+}
 
-    const content = btoa(JSON.stringify(allData,null,2));
+async function uploadData(){
+    const token = localStorage.getItem("githubToken")
+    if(!token){
+        alert("กรุณาใส่ token ก่อน")
+        return
+    }
 
-    await fetch(`https://api.github.com/repos/${repo}/contents/${dataPath}`,{
+    const content = btoa(JSON.stringify(cards,null,2))
+
+    await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
         method:"PUT",
         headers:{
-            "Authorization":"token "+token,
+            Authorization:"token "+token,
             "Content-Type":"application/json"
         },
         body:JSON.stringify({
@@ -140,14 +180,13 @@ async function updateGitHub(){
             content:content,
             sha:sha
         })
-    });
+    })
 
-    alert("บันทึกสำเร็จ");
-    loadData();
+    alert("อัปเดตสำเร็จ")
+    loadData()
 }
 
-loadData();
-
+loadData()
 </script>
 
 </body>

@@ -50,12 +50,46 @@ body { margin:0; font-family: Arial, sans-serif; }
 <a href="#" onclick="filterGrade('คณิตศาสตร์','ม.6')">ม.6</a>
 </div>
 
-<div class="menu-item" onclick="toggleDropdown('science')">
+<div class="menu-item" onclick="toggleDropdown('scienceMain')">
 วิทยาศาสตร์ ▾
 </div>
-<div class="dropdown" id="science">
-<a href="#" onclick="filterSubject('วิทยาศาสตร์')">ทั้งหมด</a>
+
+<div class="dropdown" id="scienceMain">
+
+  <!-- พื้นฐาน -->
+  <div class="menu-item" onclick="toggleDropdown('basic')">พื้นฐาน ▾</div>
+  <div class="dropdown" id="basic">
+    <a href="#" onclick="filterCategoryGrade('พื้นฐาน','ม.1')">ม.1</a>
+    <a href="#" onclick="filterCategoryGrade('พื้นฐาน','ม.2')">ม.2</a>
+    <a href="#" onclick="filterCategoryGrade('พื้นฐาน','ม.3')">ม.3</a>
+  </div>
+
+  <!-- ฟิสิกส์ -->
+  <div class="menu-item" onclick="toggleDropdown('physics')">ฟิสิกส์ ▾</div>
+  <div class="dropdown" id="physics">
+    <a href="#" onclick="filterCategoryGrade('ฟิสิกส์','ม.4')">ม.4</a>
+    <a href="#" onclick="filterCategoryGrade('ฟิสิกส์','ม.5')">ม.5</a>
+    <a href="#" onclick="filterCategoryGrade('ฟิสิกส์','ม.6')">ม.6</a>
+  </div>
+
+  <!-- เคมี -->
+  <div class="menu-item" onclick="toggleDropdown('chem')">เคมี ▾</div>
+  <div class="dropdown" id="chem">
+    <a href="#" onclick="filterCategoryGrade('เคมี','ม.4')">ม.4</a>
+    <a href="#" onclick="filterCategoryGrade('เคมี','ม.5')">ม.5</a>
+    <a href="#" onclick="filterCategoryGrade('เคมี','ม.6')">ม.6</a>
+  </div>
+
+  <!-- ชีวะ -->
+  <div class="menu-item" onclick="toggleDropdown('bio')">ชีววิทยา ▾</div>
+  <div class="dropdown" id="bio">
+    <a href="#" onclick="filterCategoryGrade('ชีววิทยา','ม.4')">ม.4</a>
+    <a href="#" onclick="filterCategoryGrade('ชีววิทยา','ม.5')">ม.5</a>
+    <a href="#" onclick="filterCategoryGrade('ชีววิทยา','ม.6')">ม.6</a>
+  </div>
+
 </div>
+
 
 </div>
 
@@ -150,3 +184,4 @@ card.style.display = text.includes(keyword) ? "block":"none";
 
 </body>
 </html>
+

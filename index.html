@@ -42,12 +42,13 @@ body { margin:0; font-family: Arial, sans-serif; }
 คณิตศาสตร์ ▾
 </div>
 <div class="dropdown" id="math">
-<a href="#" onclick="filterGrade('คณิตศาสตร์','ม.1')">ม.1</a>
-<a href="#" onclick="filterGrade('คณิตศาสตร์','ม.2')">ม.2</a>
-<a href="#" onclick="filterGrade('คณิตศาสตร์','ม.3')">ม.3</a>
-<a href="#" onclick="filterGrade('คณิตศาสตร์','ม.4')">ม.4</a>
-<a href="#" onclick="filterGrade('คณิตศาสตร์','ม.5')">ม.5</a>
-<a href="#" onclick="filterGrade('คณิตศาสตร์','ม.6')">ม.6</a>
+<a href="#" onclick="filterSubject('คณิตศาสตร์')">ทั้งหมด</a>
+<a href="#" onclick="filterData('คณิตศาสตร์','ม.1')">ม.1</a>
+<a href="#" onclick="filterData('คณิตศาสตร์','ม.2')">ม.2</a>
+<a href="#" onclick="filterData('คณิตศาสตร์','ม.3')">ม.3</a>
+<a href="#" onclick="filterData('คณิตศาสตร์','ม.4')">ม.4</a>
+<a href="#" onclick="filterData('คณิตศาสตร์','ม.5')">ม.5</a>
+<a href="#" onclick="filterData('คณิตศาสตร์','ม.6')">ม.6</a>
 </div>
 
 <div class="menu-item" onclick="toggleDropdown('scienceMain')">
@@ -55,37 +56,41 @@ body { margin:0; font-family: Arial, sans-serif; }
 </div>
 
 <div class="dropdown" id="scienceMain">
-
+  <a href="#" onclick="filterCategory('วิทยาศาสตร์')">ทั้งหมด</a>
   <!-- พื้นฐาน -->
   <div class="menu-item" onclick="toggleDropdown('basic')">พื้นฐาน ▾</div>
   <div class="dropdown" id="basic">
-    <a href="#" onclick="filterCategoryGrade('พื้นฐาน','ม.1')">ม.1</a>
-    <a href="#" onclick="filterCategoryGrade('พื้นฐาน','ม.2')">ม.2</a>
-    <a href="#" onclick="filterCategoryGrade('พื้นฐาน','ม.3')">ม.3</a>
+    <a href="#" onclick="filterSubject('พื้นฐาน')">ทั้งหมด</a>
+    <a href="#" onclick="filterData('พื้นฐาน','ม.1')">ม.1</a>
+    <a href="#" onclick="filterData('พื้นฐาน','ม.2')">ม.2</a>
+    <a href="#" onclick="filterData('พื้นฐาน','ม.3')">ม.3</a>
   </div>
 
   <!-- ฟิสิกส์ -->
   <div class="menu-item" onclick="toggleDropdown('physics')">ฟิสิกส์ ▾</div>
   <div class="dropdown" id="physics">
-    <a href="#" onclick="filterCategoryGrade('ฟิสิกส์','ม.4')">ม.4</a>
-    <a href="#" onclick="filterCategoryGrade('ฟิสิกส์','ม.5')">ม.5</a>
-    <a href="#" onclick="filterCategoryGrade('ฟิสิกส์','ม.6')">ม.6</a>
+    <a href="#" onclick="filterSubject('ฟิสิกส์')">ทั้งหมด</a>
+    <a href="#" onclick="filterData('ฟิสิกส์','ม.4')">ม.4</a>
+    <a href="#" onclick="filterData('ฟิสิกส์','ม.5')">ม.5</a>
+    <a href="#" onclick="filterData('ฟิสิกส์','ม.6')">ม.6</a>
   </div>
 
   <!-- เคมี -->
   <div class="menu-item" onclick="toggleDropdown('chem')">เคมี ▾</div>
   <div class="dropdown" id="chem">
-    <a href="#" onclick="filterCategoryGrade('เคมี','ม.4')">ม.4</a>
-    <a href="#" onclick="filterCategoryGrade('เคมี','ม.5')">ม.5</a>
-    <a href="#" onclick="filterCategoryGrade('เคมี','ม.6')">ม.6</a>
+    <a href="#" onclick="filterSubject('เคมี')">ทั้งหมด</a>
+    <a href="#" onclick="filterData('เคมี','ม.4')">ม.4</a>
+    <a href="#" onclick="filterData('เคมี','ม.5')">ม.5</a>
+    <a href="#" onclick="filterData('เคมี','ม.6')">ม.6</a>
   </div>
 
   <!-- ชีวะ -->
   <div class="menu-item" onclick="toggleDropdown('bio')">ชีววิทยา ▾</div>
   <div class="dropdown" id="bio">
-    <a href="#" onclick="filterCategoryGrade('ชีววิทยา','ม.4')">ม.4</a>
-    <a href="#" onclick="filterCategoryGrade('ชีววิทยา','ม.5')">ม.5</a>
-    <a href="#" onclick="filterCategoryGrade('ชีววิทยา','ม.6')">ม.6</a>
+    <a href="#" onclick="filterSubject('ชีววิทยา')">ทั้งหมด</a>
+    <a href="#" onclick="filterData('ชีววิทยา','ม.4')">ม.4</a>
+    <a href="#" onclick="filterData('ชีววิทยา','ม.5')">ม.5</a>
+    <a href="#" onclick="filterData('ชีววิทยา','ม.6')">ม.6</a>
   </div>
 
 </div>
@@ -94,36 +99,36 @@ body { margin:0; font-family: Arial, sans-serif; }
 <div class="menu-item" onclick="toggleDropdown('thai')">ภาษาไทย ▾</div>
 <div class="dropdown" id="thai">
   <a href="#" onclick="filterSubject('ภาษาไทย')">ทั้งหมด</a>
-  <a href="#" onclick="filterGrade('ภาษาไทย','ม.1')">ม.1</a>
-  <a href="#" onclick="filterGrade('ภาษาไทย','ม.2')">ม.2</a>
-  <a href="#" onclick="filterGrade('ภาษาไทย','ม.3')">ม.3</a>
-  <a href="#" onclick="filterGrade('ภาษาไทย','ม.4')">ม.4</a>
-  <a href="#" onclick="filterGrade('ภาษาไทย','ม.5')">ม.5</a>
-  <a href="#" onclick="filterGrade('ภาษาไทย','ม.6')">ม.6</a>
+  <a href="#" onclick="filterData('ภาษาไทย','ม.1')">ม.1</a>
+  <a href="#" onclick="filterData('ภาษาไทย','ม.2')">ม.2</a>
+  <a href="#" onclick="filterData('ภาษาไทย','ม.3')">ม.3</a>
+  <a href="#" onclick="filterData('ภาษาไทย','ม.4')">ม.4</a>
+  <a href="#" onclick="filterData('ภาษาไทย','ม.5')">ม.5</a>
+  <a href="#" onclick="filterData('ภาษาไทย','ม.6')">ม.6</a>
 </div>
 
 <!-- ภาษาอังกฤษ -->
 <div class="menu-item" onclick="toggleDropdown('english')">ภาษาอังกฤษ ▾</div>
 <div class="dropdown" id="english">
   <a href="#" onclick="filterSubject('ภาษาอังกฤษ')">ทั้งหมด</a>
-  <a href="#" onclick="filterGrade('ภาษาอังกฤษ','ม.1')">ม.1</a>
-  <a href="#" onclick="filterGrade('ภาษาอังกฤษ','ม.2')">ม.2</a>
-  <a href="#" onclick="filterGrade('ภาษาอังกฤษ','ม.3')">ม.3</a>
-  <a href="#" onclick="filterGrade('ภาษาอังกฤษ','ม.4')">ม.4</a>
-  <a href="#" onclick="filterGrade('ภาษาอังกฤษ','ม.5')">ม.5</a>
-  <a href="#" onclick="filterGrade('ภาษาอังกฤษ','ม.6')">ม.6</a>
+  <a href="#" onclick="filterData('ภาษาอังกฤษ','ม.1')">ม.1</a>
+  <a href="#" onclick="filterData('ภาษาอังกฤษ','ม.2')">ม.2</a>
+  <a href="#" onclick="filterData('ภาษาอังกฤษ','ม.3')">ม.3</a>
+  <a href="#" onclick="filterData('ภาษาอังกฤษ','ม.4')">ม.4</a>
+  <a href="#" onclick="filterData('ภาษาอังกฤษ','ม.5')">ม.5</a>
+  <a href="#" onclick="filterData('ภาษาอังกฤษ','ม.6')">ม.6</a>
 </div>
 
 <!-- สังคม -->
 <div class="menu-item" onclick="toggleDropdown('social')">สังคม ▾</div>
 <div class="dropdown" id="social">
   <a href="#" onclick="filterSubject('สังคม')">ทั้งหมด</a>
-  <a href="#" onclick="filterGrade('สังคม','ม.1')">ม.1</a>
-  <a href="#" onclick="filterGrade('สังคม','ม.2')">ม.2</a>
-  <a href="#" onclick="filterGrade('สังคม','ม.3')">ม.3</a>
-  <a href="#" onclick="filterGrade('สังคม','ม.4')">ม.4</a>
-  <a href="#" onclick="filterGrade('สังคม','ม.5')">ม.5</a>
-  <a href="#" onclick="filterGrade('สังคม','ม.6')">ม.6</a>
+  <a href="#" onclick="filterData('สังคม','ม.1')">ม.1</a>
+  <a href="#" onclick="filterData('สังคม','ม.2')">ม.2</a>
+  <a href="#" onclick="filterData('สังคม','ม.3')">ม.3</a>
+  <a href="#" onclick="filterData('สังคม','ม.4')">ม.4</a>
+  <a href="#" onclick="filterData('สังคม','ม.5')">ม.5</a>
+  <a href="#" onclick="filterData('สังคม','ม.6')">ม.6</a>
 </div>
 
 </div>
@@ -196,13 +201,31 @@ container.innerHTML+=`
 }
 
 // filter จาก sidebar
-function filterGrade(subject,grade){
-const filtered=allData.filter(c=>c.subject===subject && c.grade===grade);
+function filterData(subject, grade, category=null){
+
+const filtered = allData.filter(item => {
+
+if(category){
+return item.subject === subject &&
+       item.grade === grade &&
+       item.category === category;
+}
+
+return item.subject === subject &&
+       item.grade === grade;
+});
+
 renderCards(filtered);
 }
 
+
 function filterSubject(subject){
 const filtered=allData.filter(c=>c.subject===subject);
+renderCards(filtered);
+}
+
+function filterCategory(category){
+const filtered=allData.filter(c=>c.category===category);
 renderCards(filtered);
 }
 
@@ -219,6 +242,7 @@ card.style.display = text.includes(keyword) ? "block":"none";
 
 </body>
 </html>
+
 
 
 

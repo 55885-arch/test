@@ -38,6 +38,8 @@ body { margin:0; font-family: Arial, sans-serif; }
 <div class="menu-item">Home</div>
 </a>
 
+<div class="menu-item" onclick="showAll()">ทั้งหมดทุกวิชา</div>
+
 <div class="menu-item" onclick="toggleDropdown('math')">
 คณิตศาสตร์ ▾
 </div>
@@ -56,7 +58,7 @@ body { margin:0; font-family: Arial, sans-serif; }
 </div>
 
 <div class="dropdown" id="scienceMain">
-  <a href="#" onclick="filterCategory('วิทยาศาสตร์')">ทั้งหมด</a>
+  
   <!-- พื้นฐาน -->
   <div class="menu-item" onclick="toggleDropdown('basic')">พื้นฐาน ▾</div>
   <div class="dropdown" id="basic">
@@ -229,6 +231,10 @@ const filtered=allData.filter(c=>c.category===category);
 renderCards(filtered);
 }
 
+function showAll(){
+renderCards(allData);
+}
+
 // search
 document.getElementById("search").addEventListener("keyup",function(){
 const keyword=this.value.toLowerCase();
@@ -242,6 +248,7 @@ card.style.display = text.includes(keyword) ? "block":"none";
 
 </body>
 </html>
+
 
 
 

@@ -4,102 +4,111 @@
 <meta charset="UTF-8">
 <title>Admin Panel</title>
 <style>
-body{font-family:Arial;padding:30px}
-input,select{margin:5px 0;padding:6px;width:300px}
-button{padding:8px 15px;margin-top:10px;cursor:pointer}
+body{font-family:Arial;padding:20px}
+input,select{padding:5px;margin:3px}
+table{border-collapse:collapse;margin-top:20px;width:100%}
+th,td{border:1px solid #ccc;padding:6px;text-align:left}
+button{padding:5px 10px;cursor:pointer}
 </style>
 </head>
 <body>
 
-<h2>Upload Lesson to GitHub</h2>
+<h2>Admin Data Manager</h2>
 
-<input type="text" id="token" placeholder="GitHub Token"><br>
-<input type="text" id="owner" placeholder="GitHub Username"><br>
-<input type="text" id="repo" placeholder="Repository Name"><br>
+Token: <input type="password" id="token"><br>
+Owner: <input type="text" id="owner"><br>
+Repo: <input type="text" id="repo"><br>
+<button onclick="loadData()">Load data.json</button>
 
 <hr>
 
-<input type="text" id="title" placeholder="Title"><br>
+<h3>Add New Lesson</h3>
+<input id="title" placeholder="Title">
+<input id="subject" placeholder="Subject">
+<input id="grade" placeholder="Grade (ม.1)">
+<input id="file" placeholder="FilesFolder/file.pdf">
+<button onclick="addLesson()">Add</button>
 
-<select id="subject">
-<option>คณิตศาสตร์</option>
-<option>พื้นฐาน</option>
-<option>ฟิสิกส์</option>
-<option>เคมี</option>
-<option>ชีววิทยา</option>
-<option>ภาษาไทย</option>
-<option>ภาษาอังกฤษ</option>
-<option>สังคม</option>
-</select><br>
+<hr>
 
-<select id="grade">
-<option>ม.1</option>
-<option>ม.2</option>
-<option>ม.3</option>
-<option>ม.4</option>
-<option>ม.5</option>
-<option>ม.6</option>
-</select><br>
+<h3>data.json Editor</h3>
+<table id="table"></table>
 
-<input type="file" id="file"><br>
-
-<button onclick="upload()">Upload</button>
+<button onclick="saveData()">Save to GitHub</button>
 
 <script>
 
-async function upload(){
+let allData = [];
+let dataSHA = "";
+
+async function loadData(){
 
 const token = document.getElementById("token").value;
 const owner = document.getElementById("owner").value;
 const repo = document.getElementById("repo").value;
 
-const title = document.getElementById("title").value;
-const subject = document.getElementById("subject").value;
-const grade = document.getElementById("grade").value;
-
-const fileInput = document.getElementById("file");
-const file = fileInput.files[0];
-
-if(!file) return alert("เลือกไฟล์ก่อน");
-
-const reader = new FileReader();
-
-reader.onload = async function() {
-
-const base64File = reader.result.split(",")[1];
-const filePath = "FilesFolder/" + file.name;
-
-// 1️⃣ Upload file
-await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,{
-method:"PUT",
-headers:{
-"Authorization":"token " + token,
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:"Upload new lesson",
-content:base64File
-})
-});
-
-// 2️⃣ Get data.json
 const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
 headers:{ "Authorization":"token " + token }
 });
-const data = await res.json();
-const sha = data.sha;
-const decoded = JSON.parse(atob(data.content));
 
-// 3️⃣ Add new lesson
-decoded.push({
-title:title,
-subject:subject,
+const data = await res.json();
+dataSHA = data.sha;
+allData = JSON.parse(atob(data.content));
+renderTable();
+}
+
+function renderTable(){
+
+const table = document.getElementById("table");
+table.innerHTML="";
+
+table.innerHTML += `
+<tr>
+<th>Title</th>
+<th>Subject</th>
+<th>Grade</th>
+<th>File</th>
+<th>Delete</th>
+</tr>
+`;
+
+allData.forEach((item,index)=>{
+table.innerHTML += `
+<tr>
+<td><input value="${item.title}" onchange="allData[${index}].title=this.value"></td>
+<td><input value="${item.subject}" onchange="allData[${index}].subject=this.value"></td>
+<td><input value="${item.grade}" onchange="allData[${index}].grade=this.value"></td>
+<td><input value="${item.file}" onchange="allData[${index}].file=this.value"></td>
+<td><button onclick="deleteRow(${index})">X</button></td>
+</tr>
+`;
+});
+}
+
+function addLesson(){
+
+allData.push({
+title:document.getElementById("title").value,
+subject:document.getElementById("subject").value,
 category:"-",
-grade:grade,
-file:filePath
+grade:document.getElementById("grade").value,
+file:document.getElementById("file").value
 });
 
-// 4️⃣ Update data.json
+renderTable();
+}
+
+function deleteRow(index){
+allData.splice(index,1);
+renderTable();
+}
+
+async function saveData(){
+
+const token = document.getElementById("token").value;
+const owner = document.getElementById("owner").value;
+const repo = document.getElementById("repo").value;
+
 await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
 method:"PUT",
 headers:{
@@ -107,18 +116,13 @@ headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-message:"Update data.json",
-content:btoa(JSON.stringify(decoded,null,2)),
-sha:sha
+message:"Update data.json via Admin GUI",
+content:btoa(JSON.stringify(allData,null,2)),
+sha:dataSHA
 })
 });
 
-alert("Upload Complete!");
-
-};
-
-reader.readAsDataURL(file);
-
+alert("Saved Successfully!");
 }
 
 </script>

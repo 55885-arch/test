@@ -3,13 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <title>Admin Panel</title>
+
 <style>
-body{font-family:Arial;background:#f4f6f9;margin:0;padding:20px}
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
 h2{margin-top:0}
-.card{background:white;padding:15px;margin-bottom:15px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
-input,select{width:100%;padding:8px;margin:5px 0}
-button{padding:8px 15px;margin-top:5px;cursor:pointer}
-.topbox{background:white;padding:15px;border-radius:10px;margin-bottom:20px}
+.card{
+background:white;
+padding:15px;
+margin-bottom:15px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+input,select{
+width:100%;
+padding:8px;
+margin:5px 0;
+}
+button{
+padding:8px 15px;
+margin-top:5px;
+cursor:pointer;
+}
+.topbox{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:20px;
+}
 </style>
 </head>
 <body>
@@ -17,9 +42,12 @@ button{padding:8px 15px;margin-top:5px;cursor:pointer}
 <h2>🔐 Admin Panel</h2>
 
 <div class="topbox">
-<button onclick="login()">🔑 Login with GitHub</button>
+<input id="token" placeholder="GitHub Token">
+<input id="owner" placeholder="Repo Owner">
+<input id="repo" placeholder="Repo Name">
+
 <button onclick="initLoad()">Load System</button>
-<button onclick="saveData()">💾 Save data.json</button>
+<button onclick="saveData()">Save data.json</button>
 
 <hr>
 
@@ -30,6 +58,7 @@ button{padding:8px 15px;margin-top:5px;cursor:pointer}
 
 <h3>➕ เพิ่มข้อมูลใหม่</h3>
 <div class="card">
+
 <input id="newTitle" placeholder="ชื่อเรื่อง">
 
 <select id="newSubject">
@@ -57,6 +86,7 @@ button{padding:8px 15px;margin-top:5px;cursor:pointer}
 </select>
 
 <button onclick="addCard()">Add</button>
+
 </div>
 
 <h3>📚 รายการทั้งหมด</h3>
@@ -64,105 +94,125 @@ button{padding:8px 15px;margin-top:5px;cursor:pointer}
 
 <script>
 
-let token=""
-let owner="55885-arch"
-let repo="test"
-let allData=[]
-let dataSHA=""
-let fileList=[]
+let allData=[];
+let dataSHA="";
+let fileList=[];
 
-// ===== AUTO GET TOKEN FROM URL =====
-window.onload=function(){
-const params=new URLSearchParams(window.location.search)
-const t=params.get("token")
-if(t){
-token=t
-alert("Login สำเร็จ 🎉")
-}
-}
-
-// ===== LOGIN =====
-function login(){
-window.location.href="/api/login"
-}
-
-// ===== UTF8 SAFE =====
+// ===== UTF8 SAFE BASE64 =====
 function toBase64UTF8(str){
-const bytes=new TextEncoder().encode(str)
-let binary=""
-bytes.forEach(b=>binary+=String.fromCharCode(b))
-return btoa(binary)
+const bytes=new TextEncoder().encode(str);
+let binary="";
+bytes.forEach(b=>binary+=String.fromCharCode(b));
+return btoa(binary);
 }
 function fromBase64UTF8(base64){
-const binary=atob(base64)
-const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0))
-return new TextDecoder().decode(bytes)
+const binary=atob(base64);
+const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+return new TextDecoder().decode(bytes);
 }
 
-// ===== INIT =====
+// ===== INIT LOAD =====
 async function initLoad(){
-if(!token){alert("กรุณา Login ก่อน");return}
-await loadFiles()
-await loadData()
+await loadFiles();
+await loadData();
 }
 
-// ===== LOAD FILES =====
+// ===== LOAD FILE LIST =====
 async function loadFiles(){
+
+const token=document.getElementById("token").value;
+const owner=document.getElementById("owner").value;
+const repo=document.getElementById("repo").value;
+
 const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/FilesFolder`,{
 headers:{Authorization:"token "+token}
-})
-const data=await res.json()
-fileList=data.filter(f=>f.type==="file").map(f=>"FilesFolder/"+f.name)
+});
 
-const select=document.getElementById("newFileSelect")
-select.innerHTML='<option value="">-- เลือกไฟล์ --</option>'
+const data=await res.json();
+
+fileList=data.filter(f=>f.type==="file")
+.map(f=>"FilesFolder/"+f.name);
+
+const select=document.getElementById("newFileSelect");
+select.innerHTML='<option value="">-- เลือกไฟล์ --</option>';
+
 fileList.forEach(f=>{
-select.innerHTML+=`<option value="${f}">${f.replace("FilesFolder/","")}</option>`
-})
+select.innerHTML+=`<option value="${f}">
+${f.replace("FilesFolder/","")}
+</option>`;
+});
 }
 
-// ===== LOAD DATA =====
+// ===== LOAD DATA.JSON =====
 async function loadData(){
+
+const token=document.getElementById("token").value;
+const owner=document.getElementById("owner").value;
+const repo=document.getElementById("repo").value;
+
 const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
 headers:{Authorization:"token "+token}
-})
-const data=await res.json()
-allData=JSON.parse(fromBase64UTF8(data.content))
-dataSHA=data.sha
-renderCards()
+});
+
+const data=await res.json();
+
+allData=JSON.parse(fromBase64UTF8(data.content));
+dataSHA=data.sha;
+
+renderCards();
 }
 
-// ===== SAVE =====
+// ===== SAVE DATA =====
 async function saveData(){
-const jsonString=JSON.stringify(allData,null,2)
+
+const token=document.getElementById("token").value;
+const owner=document.getElementById("owner").value;
+const repo=document.getElementById("repo").value;
+
+const jsonString=JSON.stringify(allData,null,2);
+
 await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
 method:"PUT",
-headers:{Authorization:"token "+token,"Content-Type":"application/json"},
+headers:{
+Authorization:"token "+token,
+"Content-Type":"application/json"
+},
 body:JSON.stringify({
-message:"Update data.json via Admin",
+message:"Update data.json via Admin Panel",
 content:toBase64UTF8(jsonString),
 sha:dataSHA
 })
-})
-alert("บันทึกสำเร็จ")
-await loadData()
+});
+
+alert("บันทึกสำเร็จ");
 }
 
-// ===== RENDER =====
+// ===== RENDER CARDS =====
 function renderCards(){
-const container=document.getElementById("cardList")
-container.innerHTML=""
+
+const container=document.getElementById("cardList");
+container.innerHTML="";
+
 allData.forEach((item,index)=>{
+
 container.innerHTML+=`
 <div class="card">
-<input value="${item.title}" onchange="allData[${index}].title=this.value">
+
+<input value="${item.title}"
+onchange="allData[${index}].title=this.value">
 
 <select onchange="allData[${index}].subject=this.value">
-${generateOptions(["คณิตศาสตร์","พื้นฐาน","ฟิสิกส์","เคมี","ชีววิทยา","ภาษาไทย","ภาษาอังกฤษ","สังคม"],item.subject)}
+${generateOptions(
+["คณิตศาสตร์","พื้นฐาน","ฟิสิกส์","เคมี","ชีววิทยา","ภาษาไทย","ภาษาอังกฤษ","สังคม"],
+item.subject
+)}
 </select>
 
 <select onchange="allData[${index}].grade=this.value">
-${generateOptions(["ม.1","ม.2","ม.3","ม.4","ม.5","ม.6"],item.grade)}
+${generateOptions(
+["ม.1","ม.2","ม.3","ม.4","ม.5","ม.6"],
+item.grade
+)}
 </select>
 
 <select onchange="allData[${index}].file=this.value">
@@ -170,58 +220,84 @@ ${generateOptions(fileList,item.file,true)}
 </select>
 
 <button onclick="deleteCard(${index})">❌ Delete</button>
+
 </div>
-`
-})
+`;
+});
 }
 
-function generateOptions(arr,selected,isFile=false){
-let html=""
-arr.forEach(val=>{
-let text=isFile?val.replace("FilesFolder/",""):val
-html+=`<option value="${val}" ${val===selected?"selected":""}>${text}</option>`
-})
-return html
+// ===== GENERATE OPTIONS =====
+function generateOptions(array,selected,isFile=false){
+let html="";
+array.forEach(val=>{
+let text=isFile?val.replace("FilesFolder/",""):val;
+html+=`<option value="${val}" ${val===selected?"selected":""}>
+${text}
+</option>`;
+});
+return html;
 }
 
+// ===== ADD =====
 function addCard(){
+
 allData.push({
 title:document.getElementById("newTitle").value,
 subject:document.getElementById("newSubject").value,
 category:"-",
 grade:document.getElementById("newGrade").value,
 file:document.getElementById("newFileSelect").value
-})
-renderCards()
+});
+
+renderCards();
 }
 
-function deleteCard(i){
-allData.splice(i,1)
-renderCards()
+// ===== DELETE =====
+function deleteCard(index){
+allData.splice(index,1);
+renderCards();
 }
 
 // ===== UPLOAD FILE =====
 async function uploadFile(){
-const file=document.getElementById("fileUpload").files[0]
-if(!file){alert("เลือกไฟล์ก่อน");return}
 
-const reader=new FileReader()
+const token=document.getElementById("token").value;
+const owner=document.getElementById("owner").value;
+const repo=document.getElementById("repo").value;
+
+const fileInput=document.getElementById("fileUpload");
+const file=fileInput.files[0];
+
+if(!file){ alert("เลือกไฟล์ก่อน"); return; }
+
+const reader=new FileReader();
+
 reader.onload=async function(){
-const base64=reader.result.split(",")[1]
+
+const base64=reader.result.split(",")[1];
+
 await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/FilesFolder/${file.name}`,{
 method:"PUT",
-headers:{Authorization:"token "+token,"Content-Type":"application/json"},
+headers:{
+Authorization:"token "+token,
+"Content-Type":"application/json"
+},
 body:JSON.stringify({
 message:"Upload "+file.name,
 content:base64
 })
-})
-alert("Upload สำเร็จ")
-await loadFiles()
-}
-reader.readAsDataURL(file)
+});
+
+alert("Upload สำเร็จ");
+
+await loadFiles();
+
+};
+
+reader.readAsDataURL(file);
 }
 
 </script>
+
 </body>
 </html>

@@ -11,7 +11,40 @@ background:#f4f6f9;
 margin:0;
 padding:20px;
 }
+
 h2{margin-top:0}
+
+/* LOGIN BOX */
+#loginBox{
+max-width:400px;
+margin:100px auto;
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.15);
+text-align:center;
+}
+
+#loginBox input{
+width:100%;
+padding:10px;
+margin:10px 0;
+}
+
+#loginBox button{
+width:100%;
+background:#24292e;
+color:white;
+border:none;
+padding:10px;
+border-radius:8px;
+cursor:pointer;
+}
+
+/* ADMIN PANEL */
+#adminPanel{
+display:none;
+}
 
 .card{
 background:white;
@@ -55,30 +88,46 @@ color:white;
 
 .success{ background:#1a7f37;color:white;}
 .load{ background:#0969da;color:white;}
+.logout{ background:#cf222e;color:white;}
 </style>
 </head>
 <body>
+
+<!-- LOGIN -->
+<div id="loginBox">
+<h2>🔐 Admin Login</h2>
+<input type="password" id="adminPass" placeholder="Enter Admin Password">
+<button onclick="login()">Login</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
 
 <h2>🔐 Admin Panel</h2>
 
 <div class="topbox">
 
-<!-- AUTO SET REPO -->
 <input id="token" placeholder="GitHub Token">
 <input id="owner" value="55885-arch">
 <input id="repo" value="test">
 
 <button class="load" onclick="initLoad()">Load System</button>
 <button class="success" onclick="saveData()">Save data.json</button>
+<button class="logout" onclick="logout()">Logout</button>
 
 <hr>
 
 <h3>🐙 GitHub Quick Access</h3>
 
 <button class="repoBtn" onclick="goRepo('/')">🏠 หน้า Repo</button>
+<button class="repoBtn" onclick="goRepo('/tree/main')">🌿 Branch main</button>
 <button class="repoBtn" onclick="goRepo('/tree/main/FilesFolder')">📂 FilesFolder</button>
 <button class="repoBtn" onclick="goRepo('/blob/main/data.json')">📄 data.json</button>
+<button class="repoBtn" onclick="goRepo('/commits/main')">🕒 Commits</button>
 <button class="repoBtn" onclick="goRepo('/issues')">🐞 Issues</button>
+<button class="repoBtn" onclick="goRepo('/pulls')">🔀 Pull Requests</button>
+<button class="repoBtn" onclick="goRepo('/actions')">⚙ Actions</button>
+<button class="repoBtn" onclick="goRepo('/settings')">🔒 Settings</button>
 
 <hr>
 
@@ -124,98 +173,86 @@ color:white;
 <h3>📚 รายการทั้งหมด</h3>
 <div id="cardList"></div>
 
+</div>
+
 <script>
 
-let allData=[];
-let dataSHA="";
-let fileList=[];
+/* LOGIN SYSTEM */
+function login(){
+const pass=document.getElementById("adminPass").value;
+if(pass==="1234"){
+document.getElementById("loginBox").style.display="none";
+document.getElementById("adminPanel").style.display="block";
+}else{
+alert("รหัสผิด");
+}
+}
 
+function logout(){
+location.reload();
+}
+
+/* REPO LINK */
 function goRepo(path){
 window.open("https://github.com/55885-arch/test"+path,"_blank");
 }
 
-// UTF8 BASE64
+/* DATA SYSTEM */
+let allData=[];
+let dataSHA="";
+let fileList=[];
+
+function value(id){ return document.getElementById(id).value; }
+
 function toBase64UTF8(str){
 const bytes=new TextEncoder().encode(str);
 let binary="";
 bytes.forEach(b=>binary+=String.fromCharCode(b));
 return btoa(binary);
 }
+
 function fromBase64UTF8(base64){
 const binary=atob(base64);
 const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
 return new TextDecoder().decode(bytes);
 }
 
-// INIT
 async function initLoad(){
-if(!document.getElementById("token").value){
-alert("ใส่ Token ก่อน");
-return;
-}
+if(!value("token")){ alert("ใส่ Token ก่อน"); return; }
 await loadFiles();
 await loadData();
 alert("โหลดสำเร็จ");
 }
 
-// LOAD FILES
 async function loadFiles(){
-
-const token=tokenValue();
-const owner=value("owner");
-const repo=value("repo");
-
-const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/FilesFolder`,{
-headers:{Authorization:"token "+token}
+const res=await fetch(`https://api.github.com/repos/${value("owner")}/${value("repo")}/contents/FilesFolder`,{
+headers:{Authorization:"token "+value("token")}
 });
-
 const data=await res.json();
-
-fileList=data.filter(f=>f.type==="file")
-.map(f=>"FilesFolder/"+f.name);
-
+fileList=data.filter(f=>f.type==="file").map(f=>"FilesFolder/"+f.name);
 const select=document.getElementById("newFileSelect");
 select.innerHTML='<option value="">-- เลือกไฟล์ --</option>';
-
 fileList.forEach(f=>{
-select.innerHTML+=`<option value="${f}">
-${f.replace("FilesFolder/","")}
-</option>`;
+select.innerHTML+=`<option value="${f}">${f.replace("FilesFolder/","")}</option>`;
 });
 }
 
-// LOAD DATA
 async function loadData(){
-
-const token=tokenValue();
-const owner=value("owner");
-const repo=value("repo");
-
-const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
-headers:{Authorization:"token "+token}
+const res=await fetch(`https://api.github.com/repos/${value("owner")}/${value("repo")}/contents/data.json`,{
+headers:{Authorization:"token "+value("token")}
 });
-
 const data=await res.json();
-
 allData=JSON.parse(fromBase64UTF8(data.content));
 dataSHA=data.sha;
-
 renderCards();
 }
 
-// SAVE
 async function saveData(){
-
-const token=tokenValue();
-const owner=value("owner");
-const repo=value("repo");
-
 const jsonString=JSON.stringify(allData,null,2);
-
-await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
+await fetch(`https://api.github.com/repos/${value("owner")}/${value("repo")}/contents/data.json`,{
 method:"PUT",
 headers:{
-Authorization:"token "+token,
+Authorization:"token "+value("token"),
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
@@ -224,56 +261,28 @@ content:toBase64UTF8(jsonString),
 sha:dataSHA
 })
 });
-
 alert("บันทึกสำเร็จ");
 }
 
-// RENDER
 function renderCards(){
-
 const container=document.getElementById("cardList");
 container.innerHTML="";
-
 allData.forEach((item,index)=>{
-
 container.innerHTML+=`
 <div class="card">
-
-<input value="${item.title}"
-onchange="allData[${index}].title=this.value">
-
-<select onchange="allData[${index}].subject=this.value">
-${generateOptions(
-["คณิตศาสตร์","พื้นฐาน","ฟิสิกส์","เคมี","ชีววิทยา","ภาษาไทย","ภาษาอังกฤษ","สังคม"],
-item.subject
-)}
-</select>
-
+<input value="${item.title}" onchange="allData[${index}].title=this.value">
 <select onchange="allData[${index}].grade=this.value">
-${generateOptions(
-["ม.1","ม.2","ม.3","ม.4","ม.5","ม.6"],
-item.grade
-)}
+${generateOptions(["ม.1","ม.2","ม.3","ม.4","ม.5","ม.6"],item.grade)}
 </select>
-
-<select onchange="allData[${index}].file=this.value">
-${generateOptions(fileList,item.file,true)}
-</select>
-
 <button onclick="deleteCard(${index})">❌ Delete</button>
-
-</div>
-`;
+</div>`;
 });
 }
 
-function generateOptions(array,selected,isFile=false){
+function generateOptions(array,selected){
 let html="";
 array.forEach(val=>{
-let text=isFile?val.replace("FilesFolder/",""):val;
-html+=`<option value="${val}" ${val===selected?"selected":""}>
-${text}
-</option>`;
+html+=`<option value="${val}" ${val===selected?"selected":""}>${val}</option>`;
 });
 return html;
 }
@@ -295,26 +304,15 @@ renderCards();
 }
 
 async function uploadFile(){
-
-const token=tokenValue();
-const owner=value("owner");
-const repo=value("repo");
-
-const fileInput=document.getElementById("fileUpload");
-const file=fileInput.files[0];
-
+const file=document.getElementById("fileUpload").files[0];
 if(!file){ alert("เลือกไฟล์ก่อน"); return; }
-
 const reader=new FileReader();
-
 reader.onload=async function(){
-
 const base64=reader.result.split(",")[1];
-
-await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/FilesFolder/${file.name}`,{
+await fetch(`https://api.github.com/repos/${value("owner")}/${value("repo")}/contents/FilesFolder/${file.name}`,{
 method:"PUT",
 headers:{
-Authorization:"token "+token,
+Authorization:"token "+value("token"),
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
@@ -322,16 +320,11 @@ message:"Upload "+file.name,
 content:base64
 })
 });
-
 alert("Upload สำเร็จ");
 await loadFiles();
 };
-
 reader.readAsDataURL(file);
 }
-
-function value(id){ return document.getElementById(id).value; }
-function tokenValue(){ return document.getElementById("token").value; }
 
 </script>
 </body>

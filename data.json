@@ -6,9 +6,25 @@
     "grade": "ม.4",
     "file": "FilesFolder/TEST.txt"
   },
-  {"title": "ภาษาปกก",
+  {
+    "title": "ภาษาปกก",
     "subject": "ภาษาไทย",
     "category": "-",
     "grade": "ม.4",
-    "file": "FilesFolder/กลุ่ม 10 ใบงานที่ 4.6 ออกแบบหน้าจอ.pdf"}
+    "file": "FilesFolder/กลุ่ม 10 ใบงานที่ 4.6 ออกแบบหน้าจอ.pdf"
+  },
+  {
+    "title": "wadee",
+    "subject": "คณิตศาสตร์",
+    "category": "-",
+    "grade": "ม.1",
+    "file": "FilesFolder/TEST.txt"
+  },
+  {
+    "title": "wadee",
+    "subject": "คณิตศาสตร์",
+    "category": "-",
+    "grade": "ม.1",
+    "file": "FilesFolder/TEST.txt"
+  }
 ]

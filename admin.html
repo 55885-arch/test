@@ -12,6 +12,7 @@ margin:0;
 padding:20px;
 }
 h2{margin-top:0}
+
 .card{
 background:white;
 padding:15px;
@@ -19,22 +20,41 @@ margin-bottom:15px;
 border-radius:10px;
 box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
+
 input,select{
 width:100%;
 padding:8px;
 margin:5px 0;
 }
+
 button{
 padding:8px 15px;
 margin-top:5px;
 cursor:pointer;
+border:none;
+border-radius:6px;
 }
+
 .topbox{
 background:white;
 padding:15px;
 border-radius:10px;
 margin-bottom:20px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
+
+.repoBtn{
+display:block;
+width:100%;
+margin:6px 0;
+background:#24292e;
+color:white;
+}
+
+.repoBtn:hover{ opacity:0.85; }
+
+.success{ background:#1a7f37;color:white;}
+.load{ background:#0969da;color:white;}
 </style>
 </head>
 <body>
@@ -42,18 +62,30 @@ margin-bottom:20px;
 <h2>🔐 Admin Panel</h2>
 
 <div class="topbox">
-<input id="token" placeholder="GitHub Token">
-<input id="owner" placeholder="Repo Owner">
-<input id="repo" placeholder="Repo Name">
 
-<button onclick="initLoad()">Load System</button>
-<button onclick="saveData()">Save data.json</button>
+<!-- AUTO SET REPO -->
+<input id="token" placeholder="GitHub Token">
+<input id="owner" value="55885-arch">
+<input id="repo" value="test">
+
+<button class="load" onclick="initLoad()">Load System</button>
+<button class="success" onclick="saveData()">Save data.json</button>
+
+<hr>
+
+<h3>🐙 GitHub Quick Access</h3>
+
+<button class="repoBtn" onclick="goRepo('/')">🏠 หน้า Repo</button>
+<button class="repoBtn" onclick="goRepo('/tree/main/FilesFolder')">📂 FilesFolder</button>
+<button class="repoBtn" onclick="goRepo('/blob/main/data.json')">📄 data.json</button>
+<button class="repoBtn" onclick="goRepo('/issues')">🐞 Issues</button>
 
 <hr>
 
 <h3>📂 Upload File</h3>
 <input type="file" id="fileUpload">
 <button onclick="uploadFile()">Upload to FilesFolder</button>
+
 </div>
 
 <h3>➕ เพิ่มข้อมูลใหม่</h3>
@@ -98,7 +130,11 @@ let allData=[];
 let dataSHA="";
 let fileList=[];
 
-// ===== UTF8 SAFE BASE64 =====
+function goRepo(path){
+window.open("https://github.com/55885-arch/test"+path,"_blank");
+}
+
+// UTF8 BASE64
 function toBase64UTF8(str){
 const bytes=new TextEncoder().encode(str);
 let binary="";
@@ -111,18 +147,23 @@ const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
 return new TextDecoder().decode(bytes);
 }
 
-// ===== INIT LOAD =====
+// INIT
 async function initLoad(){
+if(!document.getElementById("token").value){
+alert("ใส่ Token ก่อน");
+return;
+}
 await loadFiles();
 await loadData();
+alert("โหลดสำเร็จ");
 }
 
-// ===== LOAD FILE LIST =====
+// LOAD FILES
 async function loadFiles(){
 
-const token=document.getElementById("token").value;
-const owner=document.getElementById("owner").value;
-const repo=document.getElementById("repo").value;
+const token=tokenValue();
+const owner=value("owner");
+const repo=value("repo");
 
 const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/FilesFolder`,{
 headers:{Authorization:"token "+token}
@@ -143,12 +184,12 @@ ${f.replace("FilesFolder/","")}
 });
 }
 
-// ===== LOAD DATA.JSON =====
+// LOAD DATA
 async function loadData(){
 
-const token=document.getElementById("token").value;
-const owner=document.getElementById("owner").value;
-const repo=document.getElementById("repo").value;
+const token=tokenValue();
+const owner=value("owner");
+const repo=value("repo");
 
 const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
 headers:{Authorization:"token "+token}
@@ -162,12 +203,12 @@ dataSHA=data.sha;
 renderCards();
 }
 
-// ===== SAVE DATA =====
+// SAVE
 async function saveData(){
 
-const token=document.getElementById("token").value;
-const owner=document.getElementById("owner").value;
-const repo=document.getElementById("repo").value;
+const token=tokenValue();
+const owner=value("owner");
+const repo=value("repo");
 
 const jsonString=JSON.stringify(allData,null,2);
 
@@ -187,7 +228,7 @@ sha:dataSHA
 alert("บันทึกสำเร็จ");
 }
 
-// ===== RENDER CARDS =====
+// RENDER
 function renderCards(){
 
 const container=document.getElementById("cardList");
@@ -226,7 +267,6 @@ ${generateOptions(fileList,item.file,true)}
 });
 }
 
-// ===== GENERATE OPTIONS =====
 function generateOptions(array,selected,isFile=false){
 let html="";
 array.forEach(val=>{
@@ -238,32 +278,27 @@ ${text}
 return html;
 }
 
-// ===== ADD =====
 function addCard(){
-
 allData.push({
-title:document.getElementById("newTitle").value,
-subject:document.getElementById("newSubject").value,
+title:value("newTitle"),
+subject:value("newSubject"),
 category:"-",
-grade:document.getElementById("newGrade").value,
-file:document.getElementById("newFileSelect").value
+grade:value("newGrade"),
+file:value("newFileSelect")
 });
-
 renderCards();
 }
 
-// ===== DELETE =====
 function deleteCard(index){
 allData.splice(index,1);
 renderCards();
 }
 
-// ===== UPLOAD FILE =====
 async function uploadFile(){
 
-const token=document.getElementById("token").value;
-const owner=document.getElementById("owner").value;
-const repo=document.getElementById("repo").value;
+const token=tokenValue();
+const owner=value("owner");
+const repo=value("repo");
 
 const fileInput=document.getElementById("fileUpload");
 const file=fileInput.files[0];
@@ -289,15 +324,15 @@ content:base64
 });
 
 alert("Upload สำเร็จ");
-
 await loadFiles();
-
 };
 
 reader.readAsDataURL(file);
 }
 
-</script>
+function value(id){ return document.getElementById(id).value; }
+function tokenValue(){ return document.getElementById("token").value; }
 
+</script>
 </body>
 </html>

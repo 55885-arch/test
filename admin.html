@@ -1,128 +1,262 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
 <meta charset="UTF-8">
 <title>Admin Panel</title>
+
 <style>
-body{font-family:Arial;padding:20px}
-input,select{padding:5px;margin:3px}
-table{border-collapse:collapse;margin-top:20px;width:100%}
-th,td{border:1px solid #ccc;padding:6px;text-align:left}
-button{padding:5px 10px;cursor:pointer}
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:0;
+padding:20px;
+}
+h2{margin-top:0}
+.card{
+background:white;
+padding:15px;
+margin-bottom:15px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+input,select{
+width:100%;
+padding:8px;
+margin:5px 0;
+}
+button{
+padding:8px 15px;
+margin-top:5px;
+cursor:pointer;
+}
+.topbox{
+background:white;
+padding:15px;
+border-radius:10px;
+margin-bottom:20px;
+}
 </style>
 </head>
 <body>
 
-<h2>Admin Data Manager</h2>
+<h2>🔐 Admin Panel</h2>
 
-Token: <input type="password" id="token"><br>
-Owner: <input type="text" id="owner"><br>
-Repo: <input type="text" id="repo"><br>
+<div class="topbox">
+<input id="token" placeholder="GitHub Token">
+<input id="owner" placeholder="Repo Owner">
+<input id="repo" placeholder="Repo Name">
 <button onclick="loadData()">Load data.json</button>
+<button onclick="saveData()">Save All</button>
 
 <hr>
 
-<h3>Add New Lesson</h3>
-<input id="title" placeholder="Title">
-<input id="subject" placeholder="Subject">
-<input id="grade" placeholder="Grade (ม.1)">
-<input id="file" placeholder="FilesFolder/file.pdf">
-<button onclick="addLesson()">Add</button>
+<h3>📂 Upload File</h3>
+<input type="file" id="fileUpload">
+<button onclick="uploadFile()">Upload to FilesFolder</button>
+</div>
 
-<hr>
+<h3>➕ เพิ่มข้อมูลใหม่</h3>
+<div class="card">
 
-<h3>data.json Editor</h3>
-<table id="table"></table>
+<input id="newTitle" placeholder="ชื่อเรื่อง">
 
-<button onclick="saveData()">Save to GitHub</button>
+<select id="newSubject">
+<option>คณิตศาสตร์</option>
+<option>พื้นฐาน</option>
+<option>ฟิสิกส์</option>
+<option>เคมี</option>
+<option>ชีววิทยา</option>
+<option>ภาษาไทย</option>
+<option>ภาษาอังกฤษ</option>
+<option>สังคม</option>
+</select>
+
+<select id="newGrade">
+<option>ม.1</option>
+<option>ม.2</option>
+<option>ม.3</option>
+<option>ม.4</option>
+<option>ม.5</option>
+<option>ม.6</option>
+</select>
+
+<input id="newFile" placeholder="FilesFolder/ชื่อไฟล์.pdf">
+
+<button onclick="addCard()">Add</button>
+
+</div>
+
+<h3>📚 รายการทั้งหมด</h3>
+<div id="cardList"></div>
 
 <script>
 
 let allData = [];
 let dataSHA = "";
 
+// ===== UTF8 SAFE BASE64 =====
+function toBase64UTF8(str){
+const bytes = new TextEncoder().encode(str);
+let binary="";
+bytes.forEach(b=>binary+=String.fromCharCode(b));
+return btoa(binary);
+}
+
+function fromBase64UTF8(base64){
+const binary=atob(base64);
+const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+return new TextDecoder().decode(bytes);
+}
+
+// ===== LOAD DATA =====
 async function loadData(){
 
-const token = document.getElementById("token").value;
-const owner = document.getElementById("owner").value;
-const repo = document.getElementById("repo").value;
+const token=document.getElementById("token").value;
+const owner=document.getElementById("owner").value;
+const repo=document.getElementById("repo").value;
 
-const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
-headers:{ "Authorization":"token " + token }
+const res=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
+headers:{Authorization:"token "+token}
 });
 
-const data = await res.json();
-dataSHA = data.sha;
-allData = JSON.parse(atob(data.content));
-renderTable();
+const data=await res.json();
+
+allData=JSON.parse(fromBase64UTF8(data.content));
+dataSHA=data.sha;
+
+renderCards();
+alert("โหลดข้อมูลสำเร็จ");
 }
 
-function renderTable(){
-
-const table = document.getElementById("table");
-table.innerHTML="";
-
-table.innerHTML += `
-<tr>
-<th>Title</th>
-<th>Subject</th>
-<th>Grade</th>
-<th>File</th>
-<th>Delete</th>
-</tr>
-`;
-
-allData.forEach((item,index)=>{
-table.innerHTML += `
-<tr>
-<td><input value="${item.title}" onchange="allData[${index}].title=this.value"></td>
-<td><input value="${item.subject}" onchange="allData[${index}].subject=this.value"></td>
-<td><input value="${item.grade}" onchange="allData[${index}].grade=this.value"></td>
-<td><input value="${item.file}" onchange="allData[${index}].file=this.value"></td>
-<td><button onclick="deleteRow(${index})">X</button></td>
-</tr>
-`;
-});
-}
-
-function addLesson(){
-
-allData.push({
-title:document.getElementById("title").value,
-subject:document.getElementById("subject").value,
-category:"-",
-grade:document.getElementById("grade").value,
-file:document.getElementById("file").value
-});
-
-renderTable();
-}
-
-function deleteRow(index){
-allData.splice(index,1);
-renderTable();
-}
-
+// ===== SAVE DATA =====
 async function saveData(){
 
-const token = document.getElementById("token").value;
-const owner = document.getElementById("owner").value;
-const repo = document.getElementById("repo").value;
+const token=document.getElementById("token").value;
+const owner=document.getElementById("owner").value;
+const repo=document.getElementById("repo").value;
+
+const jsonString=JSON.stringify(allData,null,2);
 
 await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data.json`,{
 method:"PUT",
 headers:{
-"Authorization":"token " + token,
+Authorization:"token "+token,
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-message:"Update data.json via Admin GUI",
-content:btoa(JSON.stringify(allData,null,2)),
+message:"Update data.json via Admin Panel",
+content:toBase64UTF8(jsonString),
 sha:dataSHA
 })
 });
 
-alert("Saved Successfully!");
+alert("บันทึกสำเร็จแล้ว");
+}
+
+// ===== RENDER CARDS =====
+function renderCards(){
+
+const container=document.getElementById("cardList");
+container.innerHTML="";
+
+allData.forEach((item,index)=>{
+
+container.innerHTML+=`
+<div class="card">
+
+<input value="${item.title}" 
+onchange="allData[${index}].title=this.value">
+
+<select onchange="allData[${index}].subject=this.value">
+<option ${item.subject=="คณิตศาสตร์"?"selected":""}>คณิตศาสตร์</option>
+<option ${item.subject=="พื้นฐาน"?"selected":""}>พื้นฐาน</option>
+<option ${item.subject=="ฟิสิกส์"?"selected":""}>ฟิสิกส์</option>
+<option ${item.subject=="เคมี"?"selected":""}>เคมี</option>
+<option ${item.subject=="ชีววิทยา"?"selected":""}>ชีววิทยา</option>
+<option ${item.subject=="ภาษาไทย"?"selected":""}>ภาษาไทย</option>
+<option ${item.subject=="ภาษาอังกฤษ"?"selected":""}>ภาษาอังกฤษ</option>
+<option ${item.subject=="สังคม"?"selected":""}>สังคม</option>
+</select>
+
+<select onchange="allData[${index}].grade=this.value">
+<option ${item.grade=="ม.1"?"selected":""}>ม.1</option>
+<option ${item.grade=="ม.2"?"selected":""}>ม.2</option>
+<option ${item.grade=="ม.3"?"selected":""}>ม.3</option>
+<option ${item.grade=="ม.4"?"selected":""}>ม.4</option>
+<option ${item.grade=="ม.5"?"selected":""}>ม.5</option>
+<option ${item.grade=="ม.6"?"selected":""}>ม.6</option>
+</select>
+
+<input value="${item.file}" 
+onchange="allData[${index}].file=this.value">
+
+<button onclick="deleteCard(${index})">❌ Delete</button>
+
+</div>
+`;
+});
+}
+
+// ===== ADD =====
+function addCard(){
+
+allData.push({
+title:document.getElementById("newTitle").value,
+subject:document.getElementById("newSubject").value,
+category:"-",
+grade:document.getElementById("newGrade").value,
+file:document.getElementById("newFile").value
+});
+
+renderCards();
+}
+
+// ===== DELETE =====
+function deleteCard(index){
+allData.splice(index,1);
+renderCards();
+}
+
+// ===== UPLOAD FILE =====
+async function uploadFile(){
+
+const token=document.getElementById("token").value;
+const owner=document.getElementById("owner").value;
+const repo=document.getElementById("repo").value;
+
+const fileInput=document.getElementById("fileUpload");
+const file=fileInput.files[0];
+
+if(!file){
+alert("เลือกไฟล์ก่อน");
+return;
+}
+
+const reader=new FileReader();
+
+reader.onload=async function(){
+
+const base64=reader.result.split(",")[1];
+
+await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/FilesFolder/${file.name}`,{
+method:"PUT",
+headers:{
+Authorization:"token "+token,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:"Upload "+file.name,
+content:base64
+})
+});
+
+alert("Upload สำเร็จ");
+
+document.getElementById("newFile").value="FilesFolder/"+file.name;
+
+};
+
+reader.readAsDataURL(file);
 }
 
 </script>
